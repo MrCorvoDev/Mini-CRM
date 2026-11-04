@@ -1,0 +1,18 @@
+@use "@/shared/styles/base" as *;
+
+.home {
+   display: flex;
+   flex-direction: column;
+   flex: 1 1 auto;
+   &__title {
+      font-size: em(42);
+      text-align: center;
+      strong {
+         color: var(--accent);
+      }
+   }
+   &__subtitle {
+      text-align: center;
+      font-size: em(24);
+   }
+}

@@ -1,0 +1,200 @@
+@use "./variables" as *;
+@use "./functions" as *;
+
+@mixin fade-in(
+   $duration: 0.3s,
+   $timing-function: ease-out,
+   $delay: 0s,
+   $fill-mode: forwards
+) {
+   @at-root {
+      @keyframes fadeIn {
+         from {
+            opacity: 0;
+         }
+         to {
+            opacity: 1;
+         }
+      }
+   }
+
+   animation: fadeIn $duration $timing-function $delay $fill-mode;
+}
+@mixin fade-out(
+   $duration: 0.3s,
+   $timing-function: ease-in,
+   $delay: 0s,
+   $fill-mode: forwards
+) {
+   @at-root {
+      @keyframes fadeOut {
+         from {
+            opacity: 1;
+         }
+         to {
+            opacity: 0;
+         }
+      }
+   }
+
+   animation: fadeOut $duration $timing-function $delay $fill-mode;
+}
+
+@mixin rotate(
+   $duration: 1s,
+   $timing-function: linear,
+   $iteration-count: infinite
+) {
+   @at-root {
+      @keyframes rotation {
+         0% {
+            transform: rotate(0deg);
+         }
+         100% {
+            transform: rotate(360deg);
+         }
+      }
+   }
+
+   animation: rotation $duration $timing-function $iteration-count;
+}
+
+@mixin slide-up(
+   $offset: 4,
+   $duration: 0.3s,
+   $timing-function: ease,
+   $delay: 0s,
+   $fill-mode: forwards
+) {
+   @at-root {
+      @keyframes slideUp {
+         from {
+            opacity: 0;
+            transform: translateY(var(--slide-offset));
+         }
+         to {
+            opacity: 1;
+            transform: translateY(0);
+         }
+      }
+   }
+
+   --slide-offset: #{em($offset)};
+   animation: slideUp $duration $timing-function $delay $fill-mode;
+}
+
+@mixin slide-right(
+   $offset: 4,
+   $duration: 0.3s,
+   $timing-function: ease,
+   $delay: 0s,
+   $fill-mode: forwards
+) {
+   @at-root {
+      @keyframes slideRight {
+         from {
+            opacity: 0;
+            transform: translateX(var(--slide-offset));
+         }
+         to {
+            opacity: 1;
+            transform: translateX(0);
+         }
+      }
+   }
+
+   --slide-offset: #{em($offset)};
+   animation: slideRight $duration $timing-function $delay $fill-mode;
+}
+
+@mixin slide-down(
+   $offset: 4,
+   $duration: 0.3s,
+   $timing-function: ease,
+   $delay: 0s,
+   $fill-mode: forwards
+) {
+   @at-root {
+      @keyframes slideDown {
+         from {
+            opacity: 0;
+            transform: translateY(var(--slide-offset));
+         }
+         to {
+            opacity: 1;
+            transform: translateY(0);
+         }
+      }
+   }
+
+   --slide-offset: #{em(-$offset)};
+   animation: slideDown $duration $timing-function $delay $fill-mode;
+}
+
+@mixin slide-left(
+   $offset: 4,
+   $duration: 0.3s,
+   $timing-function: ease,
+   $delay: 0s,
+   $fill-mode: forwards
+) {
+   @at-root {
+      @keyframes slideLeft {
+         from {
+            opacity: 0;
+            transform: translateX(var(--slide-offset));
+         }
+         to {
+            opacity: 1;
+            transform: translateX(0);
+         }
+      }
+   }
+
+   --slide-offset: #{em(-$offset)};
+   animation: slideLeft $duration $timing-function $delay $fill-mode;
+}
+
+@mixin scale-in(
+   $duration: 0.3s,
+   $timing-function: ease,
+   $delay: 0s,
+   $fill-mode: forwards
+) {
+   @at-root {
+      @keyframes scaleIn {
+         from {
+            opacity: 0;
+            transform: rotateX(-30deg) scale(0.9);
+         }
+         to {
+            opacity: 1;
+            transform: rotateX(0deg) scale(1);
+         }
+      }
+   }
+
+   animation: scaleIn $duration $timing-function $delay $fill-mode;
+}
+
+@mixin scale-out(
+   $duration: 0.3s,
+   $timing-function: ease,
+   $delay: 0s,
+   $fill-mode: forwards
+) {
+   @at-root {
+      @keyframes scaleOut {
+         from {
+            opacity: 1;
+            transform: rotateX(0deg) scale(1);
+         }
+         to {
+            opacity: 0;
+            transform: rotateX(-30deg) scale(0.9);
+         }
+      }
+   }
+
+   animation: scaleOut $duration $timing-function $delay $fill-mode;
+}

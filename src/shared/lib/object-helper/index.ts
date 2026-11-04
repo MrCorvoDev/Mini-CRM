@@ -1,0 +1,1 @@
+export {getByPath} from './getByPath';

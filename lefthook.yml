@@ -1,0 +1,12 @@
+pre-commit:
+   parallel: true
+   commands:
+      biome:
+         glob: "**/*.{ts,tsx,js,jsx,json,jsonc,md,css,scss,sass,yaml,yml}"
+         run: pnpm biome format --write --no-errors-on-unmatched --files-ignore-unknown=true '{staged_files}'
+         stage_fixed: true
+
+pre-push:
+   commands:
+      lint:
+         run: pnpm lint

@@ -1,0 +1,80 @@
+{
+   "vcs": {
+      "enabled": true,
+      "clientKind": "git",
+      "useIgnoreFile": true
+   },
+   "files": {
+      "ignoreUnknown": false,
+      "includes": [
+         "**/*.{ts,tsx,js,jsx,json,jsonc,md,css,scss,sass,yaml,yml}",
+         "!!**/.agents",
+         "!!pnpm-lock.yaml"
+      ]
+   },
+   "formatter": {
+      "enabled": true,
+      "indentStyle": "space",
+      "indentWidth": 3,
+      "bracketSpacing": false
+   },
+   "linter": {
+      "enabled": true,
+      "rules": {
+         "a11y": {
+            "noLabelWithoutControl": "off"
+         },
+         "preset": "recommended",
+         "suspicious": {
+            "noDoubleEquals": "error",
+            "noEmptyBlock": "off"
+         },
+         "style": {
+            "useConst": "warn"
+         },
+         "correctness": {
+            "noUnreachable": "off",
+            "noInnerDeclarations": "off",
+            "noUnknownUnit": "off",
+            "noUnknownFunction": "off"
+         },
+         "complexity": {
+            "noImportantStyles": "off"
+         }
+      }
+   },
+   "javascript": {
+      "globals": [
+         "window",
+         "document",
+         "console",
+         "setTimeout",
+         "setInterval",
+         "clearTimeout",
+         "clearInterval"
+      ],
+      "formatter": {
+         "quoteStyle": "single",
+         "semicolons": "always",
+         "trailingCommas": "all",
+         "arrowParentheses": "asNeeded"
+      }
+   },
+   "json": {
+      "formatter": {
+         "trailingCommas": "none"
+      }
+   },
+   "css": {
+      "formatter": {
+         "quoteStyle": "double"
+      }
+   },
+   "assist": {
+      "actions": {
+         "source": {
+            "organizeImports": "on"
+         }
+      }
+   }
+}

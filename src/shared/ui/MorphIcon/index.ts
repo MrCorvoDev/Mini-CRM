@@ -1,0 +1,1 @@
+export {MorphIcon} from './MorphIcon';

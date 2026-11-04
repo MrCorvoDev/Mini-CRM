@@ -1,0 +1,99 @@
+@use "./variables" as *;
+@use "sass:math";
+@use "sass:meta";
+@use "sass:string";
+
+@function get-part($part, $whole, $type: part) {
+   @if $whole == 0 {
+      @return 0;
+   }
+
+   $result: math.div($part, $whole);
+
+   @if $result == null {
+      @return 0;
+   }
+
+   @if $type == percent {
+      @return $result * 100%;
+   }
+
+   @return $result;
+}
+
+@function em($size, $default-size: $font-size-pc, $has-extension: true) {
+   $result: get-part($size, $default-size);
+
+   @if $has-extension == false {
+      @return $result;
+   } @else {
+      @return $result * 1em;
+   }
+}
+
+@function to-rem($size, $has-extension: true) {
+   $result: get-part($size, $font-size-default);
+
+   @if $has-extension == false {
+      @return $result;
+   } @else {
+      @return $result * 1rem;
+   }
+}
+
+@function dc($pc-size, $mobile-size, $viewport: 100vw) {
+   $add-size: $pc-size - $mobile-size;
+   $range: $design-width - $min-width;
+
+   @return calc(
+      #{to-rem($mobile-size)} +
+         (
+            #{to-rem($add-size, false)} *
+               (
+                  (
+                     max(#{to-rem($min-width)}, #{$viewport}) -
+                        #{to-rem($min-width)}
+                  ) /
+                     #{to-rem($range, false)}
+               )
+         )
+   );
+}
+
+@function md($value, $type: max) {
+   $integer: 0;
+
+   @if $type == min {
+      $integer: 1;
+   }
+
+   @return "#{$type}-width: #{to-rem($value + $integer)}";
+}
+
+@function isCssVariable($value) {
+   @return meta.type-of($value) == "string" and
+      string.slice($value, 1, 2) == "--";
+}
+
+@function mix($one, $two, $amount: 20%) {
+   @if isCssVariable($one) {
+      $one: var(#{$one});
+   }
+   @if isCssVariable($two) {
+      $two: var(#{$two});
+   }
+
+   @return color-mix(in srgb, #{$one} #{100% - $amount}, #{$two} #{$amount});
+}
+
+@function darken($value, $amount: 20%) {
+   @return mix($value, var(--black), $amount);
+}
+
+@function lighten($value, $amount: 20%) {
+   @return mix($value, var(--white), $amount);
+}
+
+@function transparentize($value, $amount: 20%) {
+   @return mix($value, transparent, $amount);
+}

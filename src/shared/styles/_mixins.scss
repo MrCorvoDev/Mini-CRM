@@ -1,0 +1,39 @@
+@use "sass:map";
+@use "./variables" as *;
+@use "./functions" as *;
+
+@mixin font-size(
+   $pcSize,
+   $mobileSize,
+   $lineHeight: null,
+   $letterSpacing: null,
+   $viewport: 100vw,
+   $stop-min: $design-width
+) {
+   font-size: dc($pcSize, $mobileSize, $viewport);
+
+   @if $lineHeight != null {
+      line-height: em($lineHeight, $pcSize);
+   }
+
+   @if $letterSpacing != null {
+      letter-spacing: to-rem($letterSpacing);
+   }
+
+   @if $stop-min != null {
+      @media (#{md($stop-min, min)}) {
+         font-size: to-rem($pcSize);
+      }
+   }
+}
+
+@mixin font-size-modifiers($base-size, $sizes: (sm, lg)) {
+   font-size: em($base-size);
+
+   @each $name in $sizes {
+      $multiplier: map.get($font-size-multipliers, $name);
+      &_#{$name} {
+         font-size: em($base-size * $multiplier);
+      }
+   }
+}

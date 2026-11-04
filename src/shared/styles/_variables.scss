@@ -1,0 +1,45 @@
+// Typography (duplicates in @/shared/config/typography.ts)
+$font-size-default: 16;
+$font-size-pc: 20;
+$font-size-mobile: 16;
+$font-size-multipliers: (
+   sm: 0.8,
+   lg: 1.2,
+   xl: 1.4,
+);
+
+$font-family-1: var(--font-unbounded);
+
+// Layout
+$md1: 1312;
+$md2: 1024;
+$md3: 768;
+$md4: 480;
+
+$cnt-padding-l: 54;
+$cnt-padding-s: 24;
+
+$cnt1: $md1 - $cnt-padding-l;
+$cnt2: $md2 - $cnt-padding-l;
+$cnt3: $md3 - $cnt-padding-s;
+
+$design-width: 1440;
+$min-width: 320;
+
+// Colors (duplicates in @/shared/config/colors.ts)
+:root {
+   --white: #ffffff;
+   --light: #cecece;
+   --black: #000000;
+   --dark: #333333;
+
+   --success: #28a745;
+   --error: #dc3545;
+   --warning: #ffc107;
+
+   --text: #ebf0ff;
+   --background: #020713;
+   --primary: #4e46fc;
+   --secondary: #8d44db;
+   --accent: #d0cdff;
+}

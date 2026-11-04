@@ -1,0 +1,58 @@
+@use "@/shared/styles/base" as *;
+
+:focus,
+:focus-visible {
+   outline-color: var(--text);
+   outline-offset: 1px;
+}
+
+body {
+   background: var(--background);
+   color: var(--text);
+   font-family: $font-family-1;
+   min-width: to-rem($min-width);
+}
+
+body,
+.typography-reset {
+   @include font-size($font-size-pc, $font-size-mobile);
+}
+
+.lucide {
+   width: 1em;
+   height: 1em;
+   flex: 0 0 1em;
+}
+
+.app {
+   width: 100%;
+   min-height: 100dvh;
+   display: flex;
+   flex-direction: column;
+}
+
+.content {
+   flex-grow: 1;
+   display: flex;
+   flex-direction: column;
+}
+
+.container {
+   max-width: to-rem($cnt1);
+   margin: 0 auto;
+   width: 100%;
+
+   @media (#{md($md1)}) {
+      max-width: to-rem($cnt2);
+   }
+
+   @media (#{md($md2)}) {
+      max-width: to-rem($cnt3);
+   }
+
+   @media (#{md($md3)}) {
+      max-width: none;
+      padding-left: to-rem(12);
+      padding-right: to-rem(12);
+   }
+}
