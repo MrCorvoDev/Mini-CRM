@@ -1,0 +1,77 @@
+@use "@/shared/styles/base" as *;
+
+.button {
+   display: inline-flex;
+   align-items: center;
+   justify-content: center;
+   gap: em(8);
+   padding: em(10) em(20);
+   border-radius: em(8);
+   font-family: inherit;
+   font-size: 1em;
+   font-weight: 400;
+   cursor: pointer;
+   border: none;
+   transition: opacity 0.15s ease, background 0.15s ease;
+   white-space: nowrap;
+
+   &:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+   }
+
+   &_variant {
+      &_primary {
+         background: var(--primary);
+         color: var(--white);
+
+         &:hover:not(:disabled) {
+            opacity: 0.85;
+         }
+      }
+
+      &_secondary {
+         background: transparent;
+         color: var(--text);
+         border: 1px solid var(--light);
+
+         &:hover:not(:disabled) {
+            background: rgba(255, 255, 255, 0.05);
+         }
+      }
+
+      &_danger {
+         background: var(--error);
+         color: var(--white);
+
+         &:hover:not(:disabled) {
+            opacity: 0.85;
+         }
+      }
+
+      &_ghost {
+         background: transparent;
+         color: var(--text);
+
+         &:hover:not(:disabled) {
+            background: rgba(255, 255, 255, 0.07);
+         }
+      }
+   }
+
+   &_size {
+      &_sm {
+         padding: em(6) em(14);
+         font-size: em(14);
+      }
+
+      &_lg {
+         padding: em(14) em(28);
+         font-size: em(18);
+      }
+   }
+
+   &_full-width {
+      width: 100%;
+   }
+}
