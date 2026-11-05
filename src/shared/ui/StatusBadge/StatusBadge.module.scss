@@ -1,0 +1,11 @@
+@use "@/shared/styles/base" as *;
+
+.badge {
+   display: inline-flex;
+   align-items: center;
+   padding: em(3) em(10);
+   border-radius: em(20);
+   font-size: em(13);
+   font-weight: 400;
+   white-space: nowrap;
+}
