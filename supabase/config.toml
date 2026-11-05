@@ -1,0 +1,28 @@
+# Supabase CLI configuration
+# https://supabase.com/docs/guides/cli/config
+
+[api]
+enabled = true
+port = 54321
+schemas = ["public", "storage", "graphql_public"]
+extra_search_path = ["public", "extensions"]
+max_rows = 1000
+
+[db]
+port = 54322
+major_version = 15
+
+[auth]
+enabled = true
+port = 54324
+# Requirement: open signups MUST be disabled
+enable_signup = false
+
+[auth.email]
+enable_signup = false
+double_positive = false
+enable_confirmations = false
+
+[studio]
+enabled = true
+port = 54323
