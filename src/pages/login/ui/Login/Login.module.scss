@@ -1,0 +1,10 @@
+@use "@/shared/styles/base" as *;
+
+.page {
+   display: flex;
+   align-items: center;
+   justify-content: center;
+   min-height: 100dvh;
+   padding: to-rem(20);
+   background: var(--background);
+}

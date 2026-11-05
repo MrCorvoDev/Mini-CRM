@@ -5,14 +5,14 @@ import type {Metadata} from 'next';
 import {ViewTransition} from 'react';
 
 export const metadata: Metadata = {
-   title: 'Nexty',
-   description: 'Description',
+   title: 'МиниCRM — Объекты и задачи',
+   description: 'Система управления строительными объектами и задачами',
 };
 
 export default function RootLayout({children}: React.PropsWithChildren) {
    return (
       <ViewTransition>
-         <html lang="en" className={unbounded.variable}>
+         <html lang="ru" className={unbounded.variable}>
             <body>
                <AppProvider>
                   <div className="app">

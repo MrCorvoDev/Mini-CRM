@@ -1,0 +1,45 @@
+@use "@/shared/styles/base" as *;
+
+.form {
+   display: flex;
+   flex-direction: column;
+   gap: em(24);
+   width: 100%;
+   max-width: em(400);
+   margin: 0 auto;
+   padding: em(40) em(36);
+   background: #0d1527;
+   border: 1px solid rgba(255, 255, 255, 0.08);
+   border-radius: em(16);
+}
+
+.title {
+   font-size: em(28);
+   font-weight: 700;
+   color: var(--text);
+   text-align: center;
+   margin: 0;
+}
+
+.subtitle {
+   font-size: em(14);
+   color: var(--light);
+   text-align: center;
+   margin: em(-16) 0 0;
+}
+
+.fields {
+   display: flex;
+   flex-direction: column;
+   gap: em(16);
+}
+
+.error {
+   color: var(--error);
+   font-size: em(14);
+   text-align: center;
+   padding: em(10) em(14);
+   background: rgba(220, 53, 69, 0.1);
+   border-radius: em(6);
+   margin: 0;
+}

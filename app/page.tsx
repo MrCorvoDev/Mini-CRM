@@ -1,5 +1,5 @@
-import {Home} from '@/pages/home';
+import {redirect} from 'next/navigation';
 
-export default function Page() {
-   return Home();
+export default function Home() {
+   redirect('/sites');
 }
