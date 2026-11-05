@@ -32,10 +32,17 @@ async function createAuthClient(email, password) {
   return {client, user: data.user};
 }
 
+class SkipTest extends Error {}
+
+function skip(reason) {
+  throw new SkipTest(reason);
+}
+
 async function runTests() {
   console.log('🚀 Starting Mini-CRM Security Test Suite...\n');
   let passed = 0;
   let failed = 0;
+  let skipped = 0;
 
   let manager, exec1, exec2;
 
@@ -59,6 +66,12 @@ async function runTests() {
       console.log(`✅ PASS: ${name}`);
       passed++;
     } catch (err) {
+      if (err instanceof SkipTest) {
+        console.log(`⏭️ SKIP: ${name}`);
+        console.log(`   Reason: ${err.message}`);
+        skipped++;
+        return;
+      }
       console.log(`❌ FAIL: ${name}`);
       console.log(`   Reason: ${err.message}`);
       failed++;
@@ -111,8 +124,7 @@ async function runTests() {
       .limit(1);
 
     if (!onReviewTasks || onReviewTasks.length === 0) {
-      console.log('   (Skipped transition test: no task in on_review status)');
-      return;
+      skip('no task in on_review status (run supabase/seed.sql)');
     }
 
     const taskId = onReviewTasks[0].id;
@@ -135,8 +147,7 @@ async function runTests() {
       .limit(1);
 
     if (!newTasks || newTasks.length === 0) {
-      console.log('   (Skipped transition test: no task in new status)');
-      return;
+      skip('no task in new status (run supabase/seed.sql)');
     }
 
     const taskId = newTasks[0].id;
@@ -159,8 +170,7 @@ async function runTests() {
       .limit(1);
 
     if (!onReviewTasks || onReviewTasks.length === 0) {
-      console.log('   (Skipped rework test: no task in on_review status)');
-      return;
+      skip('no task in on_review status (run supabase/seed.sql)');
     }
 
     const taskId = onReviewTasks[0].id;
@@ -231,8 +241,52 @@ async function runTests() {
     }
   });
 
+  // ── TEST 7: Executor can resolve the creator name of their own task ──────
+  await test('Executor can read creator profile for a visible task', async () => {
+    const {data: myTasks} = await exec1.client
+      .from('tasks')
+      .select('id')
+      .eq('assignee_id', exec1.user.id)
+      .limit(1);
+
+    if (!myTasks || myTasks.length === 0) {
+      skip('executor 1 has no tasks (run supabase/seed.sql)');
+    }
+
+    const {error: migrationCheckError} = await exec1.client.rpc(
+      'is_task_participant',
+      {p_user_id: manager.user.id},
+    );
+
+    if (
+      migrationCheckError &&
+      /(could not find the function|schema cache|PGRST202)/i.test(
+        migrationCheckError.message,
+      )
+    ) {
+      skip('migration 20260001000005_profiles_task_participants.sql is not applied');
+    }
+
+    const {data, error} = await exec1.client
+      .from('tasks')
+      .select(
+        'id, creator:profiles!tasks_created_by_fkey(id, full_name)',
+      )
+      .eq('id', myTasks[0].id)
+      .single();
+
+    if (error) throw error;
+    if (!data?.creator?.full_name) {
+      throw new Error(
+        'Executor cannot read the creator name through profiles RLS',
+      );
+    }
+  });
+
   console.log(`\n========================================`);
-  console.log(`Summary: ${passed} passed, ${failed} failed`);
+  console.log(
+    `Summary: ${passed} passed, ${failed} failed, ${skipped} skipped`,
+  );
   console.log(`========================================\n`);
 
   if (failed > 0) {

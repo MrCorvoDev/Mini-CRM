@@ -12,7 +12,11 @@ export const metadata: Metadata = {
 export default function RootLayout({children}: React.PropsWithChildren) {
    return (
       <ViewTransition>
-         <html lang="ru" className={unbounded.variable}>
+         <html
+            lang="ru"
+            data-scroll-behavior="smooth"
+            className={unbounded.variable}
+         >
             <body>
                <AppProvider>
                   <div className="app">

@@ -196,6 +196,12 @@ export interface Database {
             Args: Record<string, never>;
             Returns: UserRole;
          };
+         is_task_participant: {
+            Args: {
+               p_user_id: string;
+            };
+            Returns: boolean;
+         };
       };
       Enums: {
          user_role: UserRole;

@@ -1,5 +1,7 @@
 import {SiteDetail} from '@/pages/sites-detail';
 
+export const instant = false;
+
 interface Props {
    params: Promise<{id: string}>;
 }

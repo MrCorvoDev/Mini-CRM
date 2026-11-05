@@ -14,7 +14,7 @@ export interface Task {
    updated_at: string;
    // joined
    assignee?: {full_name: string; role: string};
-   creator?: {full_name: string};
+   creator?: {full_name: string; role?: string};
    site?: {name: string; address: string};
 }
 
@@ -26,7 +26,7 @@ export interface TaskHistory {
    from_status: TaskStatus | null;
    to_status: TaskStatus;
    comment: string;
-   changer?: {full_name: string};
+   changer?: {full_name: string; role?: string};
 }
 
 export function useTasks(siteId?: string) {
@@ -38,7 +38,7 @@ export function useTasks(siteId?: string) {
             .select(`
           *,
           assignee:profiles!tasks_assignee_id_fkey(full_name, role),
-          creator:profiles!tasks_created_by_fkey(full_name),
+          creator:profiles!tasks_created_by_fkey(full_name, role),
           site:sites(name, address)
         `)
             .order('created_at', {ascending: false});
@@ -61,7 +61,7 @@ export function useTask(id: string) {
             .select(`
           *,
           assignee:profiles!tasks_assignee_id_fkey(full_name, role),
-          creator:profiles!tasks_created_by_fkey(full_name),
+          creator:profiles!tasks_created_by_fkey(full_name, role),
           site:sites(name, address)
         `)
             .eq('id', id)
@@ -86,6 +86,7 @@ export function useMyTasks() {
             .select(`
           *,
           assignee:profiles!tasks_assignee_id_fkey(full_name, role),
+          creator:profiles!tasks_created_by_fkey(full_name, role),
           site:sites(name, address)
         `)
             .eq('assignee_id', user.id)
@@ -104,7 +105,7 @@ export function useTaskHistory(taskId: string) {
             .from('task_history')
             .select(`
           *,
-          changer:profiles!task_history_changed_by_fkey(full_name)
+          changer:profiles!task_history_changed_by_fkey(full_name, role)
         `)
             .eq('task_id', taskId)
             .order('changed_at', {ascending: true});
@@ -121,22 +122,26 @@ export function useCreateTask() {
       mutationFn: async (input: {
          site_id: string;
          title: string;
-         description: string;
+         description?: string;
          assignee_id: string;
       }) => {
          const {data, error} = await supabase
             .from('tasks')
-            .insert({...input, status: 'new'})
+            .insert({
+               site_id: input.site_id,
+               title: input.title,
+               description: input.description ?? '',
+               assignee_id: input.assignee_id,
+               status: 'new',
+            })
             .select()
             .single();
          if (error) throw error;
-         return data as Task;
+         return data;
       },
-      onSuccess: (_data, vars) => {
-         void qc.invalidateQueries({
-            queryKey: ['tasks', {siteId: vars.site_id}],
-         });
-         void qc.invalidateQueries({queryKey: ['tasks', 'my']});
+      onSuccess: data => {
+         qc.invalidateQueries({queryKey: ['tasks', {siteId: data.site_id}]});
+         qc.invalidateQueries({queryKey: ['tasks', 'my']});
       },
    });
 }
@@ -144,26 +149,22 @@ export function useCreateTask() {
 export function useChangeTaskStatus() {
    const qc = useQueryClient();
    return useMutation({
-      mutationFn: async ({
-         taskId,
-         toStatus,
-         comment = '',
-      }: {
+      mutationFn: async (input: {
          taskId: string;
          toStatus: TaskStatus;
          comment?: string;
       }) => {
          const {error} = await supabase.rpc('change_task_status', {
-            p_task_id: taskId,
-            p_to_status: toStatus,
-            p_comment: comment,
+            p_task_id: input.taskId,
+            p_to_status: input.toStatus,
+            p_comment: input.comment ?? '',
          });
          if (error) throw error;
       },
-      onSuccess: (_data, vars) => {
-         void qc.invalidateQueries({queryKey: ['tasks', vars.taskId]});
-         void qc.invalidateQueries({queryKey: ['tasks']});
-         void qc.invalidateQueries({queryKey: ['task_history', vars.taskId]});
+      onSuccess: (_data, variables) => {
+         qc.invalidateQueries({queryKey: ['tasks', variables.taskId]});
+         qc.invalidateQueries({queryKey: ['tasks']});
+         qc.invalidateQueries({queryKey: ['task_history', variables.taskId]});
       },
    });
 }
@@ -176,7 +177,7 @@ export function useDeleteTask() {
          if (error) throw error;
       },
       onSuccess: () => {
-         void qc.invalidateQueries({queryKey: ['tasks']});
+         qc.invalidateQueries({queryKey: ['tasks']});
       },
    });
 }

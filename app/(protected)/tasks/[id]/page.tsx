@@ -1,5 +1,7 @@
 import {TaskDetail} from '@/pages/tasks-detail';
 
+export const instant = false;
+
 interface Props {
    params: Promise<{id: string}>;
 }

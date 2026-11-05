@@ -1,23 +1,24 @@
-'use client';
-
-import {useRouter} from 'next/navigation';
-import {useEffect} from 'react';
-import {useSession} from '@/entities/session';
-import {Spinner} from '@/shared/ui/Spinner';
+import {redirect} from 'next/navigation';
+import {connection} from 'next/server';
+import {createServerSupabaseClient} from '@/shared/server-supabase';
 import {Navbar} from '@/widgets/Navbar';
 
-export default function ProtectedLayout({children}: React.PropsWithChildren) {
-   const router = useRouter();
-   const {session, initialized} = useSession();
+export const instant = false;
 
-   useEffect(() => {
-      if (initialized && !session) {
-         router.replace('/login');
-      }
-   }, [initialized, session, router]);
+export default async function ProtectedLayout({
+   children,
+}: React.PropsWithChildren) {
+   // The Supabase auth client reads the clock while loading the session, so
+   // force request-time rendering instead of prerendering this layout.
+   await connection();
+   const supabase = await createServerSupabaseClient();
+   const {
+      data: {user},
+   } = await supabase.auth.getUser();
 
-   if (!initialized) return <Spinner centered size="lg" />;
-   if (!session) return null;
+   if (!user) {
+      redirect('/login');
+   }
 
    return (
       <>
