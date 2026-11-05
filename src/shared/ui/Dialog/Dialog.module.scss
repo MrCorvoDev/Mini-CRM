@@ -1,0 +1,74 @@
+@use "@/shared/styles/base" as *;
+
+.overlay {
+   position: fixed;
+   inset: 0;
+   display: flex;
+   align-items: center;
+   justify-content: center;
+   z-index: 1000;
+   padding: to-rem(20);
+}
+
+.backdrop {
+   position: absolute;
+   inset: 0;
+   background: rgba(0, 0, 0, 0.6);
+   border: none;
+   padding: 0;
+   cursor: pointer;
+}
+
+.dialog {
+   position: relative;
+   z-index: 1;
+   background: #0d1527;
+   border: 1px solid rgba(255, 255, 255, 0.1);
+   border-radius: em(12);
+   padding: em(28) em(32);
+   width: 100%;
+   max-width: em(480);
+   max-height: 90vh;
+   overflow-y: auto;
+}
+
+.header {
+   display: flex;
+   align-items: center;
+   justify-content: space-between;
+   margin-bottom: em(20);
+}
+
+.title {
+   font-size: em(18);
+   font-weight: 700;
+   color: var(--text);
+}
+
+.close {
+   background: none;
+   border: none;
+   color: var(--light);
+   cursor: pointer;
+   font-size: em(20);
+   line-height: 1;
+   padding: em(4);
+   border-radius: em(4);
+
+   &:hover {
+      color: var(--text);
+   }
+}
+
+.body {
+   display: flex;
+   flex-direction: column;
+   gap: em(16);
+}
+
+.footer {
+   display: flex;
+   gap: em(12);
+   justify-content: flex-end;
+   margin-top: em(24);
+}
