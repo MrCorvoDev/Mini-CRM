@@ -1,75 +1,115 @@
-# Nexty: A Feature-Sliced Design Template for Next.js + TypeScript Projects (v0.10.0)
+# Мини-CRM «Объекты и задачи» для строительной компании
 
-Nexty is a starter template for building modern **Next.js** applications with **TypeScript**, **SCSS**, **Redux Toolkit**, **Radix UI**, **Valibot**, and **TanStack Query** — organized using the **Feature-Sliced Design (FSD)** methodology.
+Полнофункциональное production-ready веб-приложение для управления строительными объектами и задачами на базе Next.js (App Router), Supabase (PostgreSQL, Auth, RLS, Triggers), TypeScript и TanStack Query.
 
-It provides a clean, layered architecture, essential tooling, and pre-configured linting/formatting to help you start strong.
+---
 
-## Features
+## Архитектурные принципы
 
-- **Next.js (App Router)**: Full-featured React framework with SSR, SSG, ISR, and Turbopack support.
-- **TypeScript**: Strict mode with advanced type patterns.
-- **Feature-Sliced Design (FSD)**: Scalable architecture based on layers.
-- **SCSS Modules**: Component-scoped styles with BEM, `em`/`rem` utilities, and CSS custom properties.
-- **Radix UI**: Accessible, headless UI primitives wrapped in `shared/ui/`.
-- **Redux Toolkit**: Client state management (auth, UI, settings).
-- **TanStack Query**: Server/async state with caching and revalidation.
-- **Valibot**: Environment variable validation and type extraction.
-- **React 19 + React Compiler**: No manual memoization needed.
-- **Biome**: Unified linting + formatting.
-- **Steiger**: FSD architecture linting.
-- **Lefthook**: Git hooks for consistent commits.
-- **AI-Ready**: `AGENTS.md` + `.agents/skills/` for LLM-assisted development.
+Вся безопасность и логика переходов статусов живут **в базе данных**, а не во фронтенде:
+- Исполнитель видит **только свои задачи** и только те объекты, на которых ему поручена хотя бы одна задача.
+- Переходы статусов строго валидируются `BEFORE`-триггером в Postgres. Прямое изменение статуса или других полей задачи исполнителем физически блокируется на уровне СУБД.
+- Переход «На проверке» → «На доработке» требует непустого комментария, который фиксируется в истории.
+- История переходов пишется атомарно `AFTER`-триггером в той же транзакции через `SECURITY DEFINER`. Прямой `INSERT`/`UPDATE`/`DELETE` в таблицу истории запрещён для всех ролей.
+- Во фронтенде используется **только публичный `anon key`**; секретный `service_role key` исключён из сборки и отсутствует в репозитории.
 
-## Getting Started
+---
 
-### Installation
+## Быстрый старт
+
+### 1. Установка зависимостей
 
 ```bash
 pnpm install
 ```
 
-### Scripts
+### 2. Настройка переменных окружения
+
+Скопируйте пример файла конфигурации:
+```bash
+cp .env.example .env
+```
+Заполните значениями из вашего проекта Supabase:
+```env
+NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
+```
+
+### 3. Применение миграций базы данных
+
+В Supabase SQL Editor выполните файлы из директории `supabase/migrations/` по порядку:
+1. `20260001000000_initial_schema.sql` — таблицы `profiles`, `sites`, `tasks`, `task_history` и перечисления.
+2. `20260001000001_rls_policies.sql` — политики Row Level Security для всех таблиц.
+3. `20260001000002_triggers.sql` — триггеры валидации переходов и неизменяемого аудита.
+4. `20260001000003_rpc_functions.sql` — RPC-функция смены статуса `change_task_status`.
+
+### 4. Создание пользователей и начальные данные (Seed)
+
+1. В Supabase Dashboard (**Authentication → Users**) создайте трёх пользователей:
+   - `manager@example.com`
+   - `executor1@example.com`
+   - `executor2@example.com`
+2. В таблице `profiles` назначьте роли:
+   - для `manager@example.com` → `role = 'manager'`
+   - для исполнителей → `role = 'executor'`
+3. Заполните тестовые данные, выполнив миграцию `20260001000004_seed_dev.sql` (предварительно подставив реальные UUID пользователей в блоке `declare`).
+
+### 5. Запуск локального сервера разработки
 
 ```bash
-pnpm run dev          # Start development server with Turbopack
-pnpm run build        # Build production bundle (required before start)
-pnpm run start        # Start production server
-pnpm run lint         # Run Biome + TypeScript + Steiger (FSD) linters
-pnpm run lint-unsafe  # Auto-fix lint issues (unsafe)
-pnpm run format       # Format with Biome
+pnpm dev
+```
+Откройте [http://localhost:3000](http://localhost:3000) в браузере.
+
+---
+
+## Проверка качества и линтинг
+
+Проект настроен на строгую проверку типов, архитектурных правил FSD (Feature-Sliced Design v2.1) и форматирования:
+```bash
+# Проверка Biome + TypeScript + Steiger (FSD linter)
+pnpm lint
+
+# Сборка production bundle
+pnpm build
 ```
 
-## Folder Structure (FSD)
+---
 
-```
-Nexty/
-├── app/                      # Next.js app directory
-├── pages/                    # Next.js pages placeholder — do not touch
-├── public/                   # Static assets
-├── src/
-│   ├── app/                  # Providers, root layout, global styles, store
-│   ├── pages/                # Page components
-│   ├── widgets/              # UI blocks composed from entities/shared
-│   ├── features/             # User scenarios + API layer
-│   ├── entities/             # Domain types, business-logic independent
-│   └── shared/
-│       ├── api/              # Reusable API clients
-│       ├── assets/           # Static assets
-│       ├── config/           # Env, routes, constants, feature flags
-│       ├── lib/              # Framework-agnostic helpers
-│       ├── styles/           # _base.scss, _variables.scss, _functions.scss, _mixins.scss
-│       └── ui/               # Shared UI components
+## Запуск тестов безопасности
+
+Проект включает автоматизированные тесты для проверки изоляции данных и логики безопасности под разными JWT:
+```bash
+# Запуск автоматизированного Node.js раннера
+pnpm test:security
+
+# Или запуск SQL-тестов напрямую в PostgreSQL
+psql "$DATABASE_URL" -f supabase/tests/security_tests.sql
 ```
 
-## Notes
+Тесты проверяют:
+1. Исполнитель А не может прочитать задачи исполнителя Б.
+2. Исполнитель не может изменить `title`, `description` или `assignee_id`.
+3. Исполнитель не может перевести задачу из `on_review` в `accepted`.
+4. Менеджер не может выполнить недопустимый переход (например, из `new` сразу в `accepted`).
+5. Переход `on_review` → `rework` без комментария отклоняется базой данных.
+6. Прямой `INSERT`, `UPDATE` и `DELETE` в таблицу `task_history` отклоняются RLS.
+7. Исполнитель не может создать задачу или изменить свою роль в `profiles`.
 
-- **FSD:** Architecture Organized with Feature-Sliced Design https://fsd.how.
-- **HTML:** Use BEM methodology for maintainable components (block__element_modificator).
-- **Layout:** Body element has font-size that dynamically changing depending on width.
-- **Styling:** Use em and rem units(there are scss functions) for responsible design.
-- **Fonts:** Add Google Fonts in `src/app/styles/fonts.ts`.
-- **State:** Use Redux for global state; TanStack Query for server state.
-- **Hooks & Libs:** Place reusable utilities in shared/lib/ and domain-specific ones inside respective slices.
-- **Env vars:** Add to `.env.local`, expose via `shared/config/`.
-- **Imports:** Public API only — `index.ts` at slice root, no deep imports.
-- **AI Development:** Rules and conventions for LLM agents are in `AGENTS.md`. Task-specific skills live in `.agents/skills/`.
+---
+
+## Деплой на Vercel
+
+1. Создайте репозиторий на GitHub и запушьте код.
+2. Импортируйте репозиторий в [Vercel](https://vercel.com).
+3. Добавьте переменные окружения:
+   - `NEXT_PUBLIC_SUPABASE_URL`
+   - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+4. Нажмите **Deploy**.
+
+---
+
+## Документация проекта
+
+- **[DECISIONS.md](file:///Users/mrcorvodev/Core/Work/Projects/2026/Mini%20CRM/DECISIONS.md)** — архитектурные решения, обоснование FSD-структуры и допущения.
+- **[EXPLAINER.md](file:///Users/mrcorvodev/Core/Work/Projects/2026/Mini%20CRM/EXPLAINER.md)** — описание системы простым языком для руководителя без технического бэкграунда.
