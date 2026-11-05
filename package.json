@@ -1,6 +1,6 @@
 {
-   "name": "nexty",
-   "version": "0.10.0",
+   "name": "mini-crm",
+   "version": "1.0.0",
    "private": true,
    "type": "module",
    "scripts": {
@@ -10,10 +10,12 @@
       "lint": "biome check && tsc --noEmit && steiger ./src",
       "lint-unsafe": "biome check --write --unsafe . && tsc --noEmit && steiger ./src --fix",
       "format": "biome format --write",
+      "test:security": "node --env-file=.env supabase/tests/run_security_tests.mjs",
       "postinstall": "lefthook install"
    },
    "dependencies": {
       "@reduxjs/toolkit": "^2.13.0",
+      "@supabase/supabase-js": "^2.118.0",
       "@tanstack/react-query": "^5.105.3",
       "@uidotdev/usehooks": "^2.4.1",
       "clsx": "^2.1.1",
