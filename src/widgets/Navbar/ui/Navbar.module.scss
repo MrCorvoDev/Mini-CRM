@@ -1,0 +1,68 @@
+@use "@/shared/styles/base" as *;
+
+.navbar {
+   background: #0a1020;
+   border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+   padding: 0 to-rem(24);
+   display: flex;
+   align-items: center;
+   gap: to-rem(32);
+   height: to-rem(60);
+   position: sticky;
+   top: 0;
+   z-index: 100;
+}
+
+.brand {
+   font-weight: 700;
+   font-size: em(16);
+   color: var(--primary);
+   text-decoration: none;
+   flex-shrink: 0;
+}
+
+.nav {
+   display: flex;
+   align-items: center;
+   gap: to-rem(4);
+   flex: 1;
+}
+
+.link {
+   color: var(--light);
+   text-decoration: none;
+   font-size: em(14);
+   padding: em(6) em(12);
+   border-radius: em(6);
+   transition: color 0.15s, background 0.15s;
+
+   &:hover {
+      color: var(--text);
+      background: rgba(255, 255, 255, 0.05);
+   }
+
+   &_active {
+      color: var(--text);
+      background: rgba(78, 70, 252, 0.15);
+   }
+}
+
+.user {
+   display: flex;
+   align-items: center;
+   gap: em(12);
+   margin-left: auto;
+}
+
+.user-name {
+   font-size: em(13);
+   color: var(--light);
+}
+
+.role-badge {
+   font-size: em(11);
+   padding: em(2) em(8);
+   border-radius: em(20);
+   background: rgba(78, 70, 252, 0.2);
+   color: var(--accent);
+}
