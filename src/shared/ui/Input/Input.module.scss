@@ -1,0 +1,44 @@
+@use "@/shared/styles/base" as *;
+
+.input {
+   width: 100%;
+   padding: em(10) em(14);
+   background: rgba(255, 255, 255, 0.05);
+   border: 1px solid rgba(255, 255, 255, 0.15);
+   border-radius: em(8);
+   color: var(--text);
+   font-family: inherit;
+   font-size: to-rem(18);
+   transition: border-color 0.15s ease;
+
+   &::placeholder {
+      color: rgba(255, 255, 255, 0.35);
+   }
+
+   &:focus {
+      outline: none;
+      border-color: var(--primary);
+   }
+
+   &_error {
+      border-color: var(--error);
+   }
+}
+
+.label {
+   display: block;
+   font-size: em(14);
+   color: var(--light);
+   margin-bottom: em(6);
+}
+
+.error-message {
+   font-size: em(13);
+   color: var(--error);
+   margin-top: em(4);
+}
+
+.field {
+   display: flex;
+   flex-direction: column;
+}
