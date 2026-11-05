@@ -1,8 +1,9 @@
 'use client';
 
+import {useQueryClient} from '@tanstack/react-query';
 import clsx from 'clsx';
 import Link from 'next/link';
-import {usePathname, useRouter} from 'next/navigation';
+import {usePathname} from 'next/navigation';
 import {useCurrentProfile} from '@/entities/session';
 import {supabase} from '@/shared/api';
 import {Button} from '@/shared/ui/Button';
@@ -12,13 +13,16 @@ const ROLE_LABELS = {manager: 'Менеджер', executor: 'Исполните�
 
 export const Navbar = () => {
    const pathname = usePathname();
-   const router = useRouter();
+   const queryClient = useQueryClient();
    const {profile, isManager} = useCurrentProfile();
 
    const handleLogout = async () => {
-      await supabase.auth.signOut();
-      router.push('/login');
-      router.refresh();
+      try {
+         await supabase.auth.signOut();
+      } finally {
+         queryClient.clear();
+         window.location.replace('/login');
+      }
    };
 
    if (!profile) return null;

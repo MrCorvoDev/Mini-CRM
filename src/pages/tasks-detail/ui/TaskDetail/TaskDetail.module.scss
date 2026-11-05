@@ -2,7 +2,7 @@
 
 .page {
    padding: to-rem(32) to-rem(24);
-   max-width: to-rem(800);
+   max-width: to-rem(840);
    margin: 0 auto;
    width: 100%;
 }
@@ -24,10 +24,10 @@
 
 .card {
    background: #0d1527;
-   border: 1px solid rgba(255, 255, 255, 0.07);
-   border-radius: em(14);
+   border: 1px solid rgba(255, 255, 255, 0.08);
+   border-radius: em(16);
    padding: em(28) em(32);
-   margin-bottom: to-rem(24);
+   margin-bottom: to-rem(28);
 }
 
 .card-header {
@@ -35,7 +35,9 @@
    align-items: flex-start;
    justify-content: space-between;
    gap: em(16);
-   margin-bottom: em(20);
+   margin-bottom: em(24);
+   padding-bottom: em(18);
+   border-bottom: 1px solid rgba(255, 255, 255, 0.07);
 }
 
 .title {
@@ -43,16 +45,18 @@
    font-weight: 700;
    margin: 0;
    flex: 1;
+   line-height: 1.3;
 }
 
 .meta-grid {
    display: grid;
    grid-template-columns: repeat(2, 1fr);
-   gap: em(12) em(24);
-   margin-bottom: em(20);
+   gap: em(16) em(28);
+   margin-bottom: em(24);
 
    @media (#{md($md3)}) {
       grid-template-columns: 1fr;
+      gap: em(14);
    }
 }
 
@@ -66,34 +70,81 @@
    font-size: em(12);
    color: var(--light);
    text-transform: uppercase;
-   letter-spacing: 0.05em;
+   letter-spacing: 0.06em;
+   font-weight: 500;
 }
 
 .meta-value {
-   font-size: em(14);
+   font-size: em(15);
    color: var(--text);
+   line-height: 1.4;
+}
+
+.meta-link {
+   color: var(--accent);
+   text-decoration: none;
+
+   &:hover {
+      text-decoration: underline;
+   }
+}
+
+.description-box {
+   background: rgba(255, 255, 255, 0.03);
+   border: 1px solid rgba(255, 255, 255, 0.06);
+   border-radius: em(10);
+   padding: em(16) em(20);
+   margin-top: em(20);
+}
+
+.description-title {
+   font-size: em(12);
+   color: var(--light);
+   text-transform: uppercase;
+   letter-spacing: 0.06em;
+   margin: 0 0 em(8);
+   font-weight: 500;
 }
 
 .description {
-   color: var(--light);
+   color: var(--text);
    font-size: em(14);
    line-height: 1.6;
-   border-top: 1px solid rgba(255, 255, 255, 0.07);
-   padding-top: em(16);
-   margin-top: em(16);
+   margin: 0;
    white-space: pre-wrap;
+}
+
+.actions-container {
+   margin-top: em(24);
+   padding-top: em(20);
+   border-top: 1px solid rgba(255, 255, 255, 0.07);
+   display: flex;
+   flex-direction: column;
+   gap: em(16);
+}
+
+.rework-box {
+   display: flex;
+   flex-direction: column;
+   gap: em(8);
+   background: rgba(255, 193, 7, 0.04);
+   border: 1px solid rgba(255, 193, 7, 0.2);
+   border-radius: em(10);
+   padding: em(16);
 }
 
 .actions {
    display: flex;
    flex-wrap: wrap;
-   gap: em(10);
-   margin-top: em(20);
-   padding-top: em(20);
-   border-top: 1px solid rgba(255, 255, 255, 0.07);
+   align-items: center;
+   gap: em(12);
 }
 
 // History
+.history-section {
+   margin-top: to-rem(32);
+}
+
 .history-title {
    font-size: em(18);
    font-weight: 700;
@@ -103,14 +154,14 @@
 .history-list {
    display: flex;
    flex-direction: column;
-   gap: em(10);
+   gap: em(12);
 }
 
 .history-item {
    background: #0d1527;
-   border: 1px solid rgba(255, 255, 255, 0.05);
-   border-radius: em(10);
-   padding: em(14) em(18);
+   border: 1px solid rgba(255, 255, 255, 0.06);
+   border-radius: em(12);
+   padding: em(16) em(20);
 }
 
 .history-row {
@@ -118,6 +169,7 @@
    align-items: center;
    gap: em(10);
    flex-wrap: wrap;
+   margin-bottom: em(8);
 }
 
 .history-arrow {
@@ -127,18 +179,26 @@
 
 .history-comment {
    font-size: em(13);
-   color: var(--warning);
-   margin-top: em(6);
-   padding: em(8);
-   background: rgba(255, 193, 7, 0.07);
-   border-radius: em(6);
-   border-left: 2px solid var(--warning);
+   color: #fbbf24;
+   margin: em(6) 0 em(8);
+   padding: em(10) em(14);
+   background: rgba(245, 158, 11, 0.08);
+   border-radius: em(8);
+   border-left: 3px solid #f59e0b;
+   line-height: 1.5;
 }
 
 .history-meta {
    font-size: em(12);
    color: var(--light);
-   margin-top: em(6);
+   margin: 0;
+   display: flex;
+   align-items: center;
+   gap: em(8);
+}
+
+.history-role {
+   color: var(--accent);
 }
 
 .error {
@@ -147,4 +207,5 @@
    padding: em(10) em(14);
    background: rgba(220, 53, 69, 0.1);
    border-radius: em(6);
+   margin: 0;
 }

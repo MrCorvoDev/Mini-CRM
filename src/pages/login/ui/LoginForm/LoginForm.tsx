@@ -1,7 +1,9 @@
 'use client';
 
+import {useQueryClient} from '@tanstack/react-query';
 import {useRouter} from 'next/navigation';
-import {useState} from 'react';
+import {useEffect, useState} from 'react';
+import {verifyServerSession} from '@/entities/session';
 import {supabase} from '@/shared/api';
 import {Button} from '@/shared/ui/Button';
 import {Input} from '@/shared/ui/Input';
@@ -9,10 +11,24 @@ import styles from './LoginForm.module.scss';
 
 export const LoginForm = () => {
    const router = useRouter();
+   const queryClient = useQueryClient();
    const [email, setEmail] = useState('');
    const [password, setPassword] = useState('');
    const [error, setError] = useState('');
    const [loading, setLoading] = useState(false);
+
+   // Reset form and prevent restoring stale inputs from bfcache
+   useEffect(() => {
+      const handlePageShow = (e: PageTransitionEvent) => {
+         if (e.persisted) {
+            setEmail('');
+            setPassword('');
+            setError('');
+         }
+      };
+      window.addEventListener('pageshow', handlePageShow);
+      return () => window.removeEventListener('pageshow', handlePageShow);
+   }, []);
 
    const handleSubmit = async (e: React.FormEvent) => {
       e.preventDefault();
@@ -26,11 +42,35 @@ export const LoginForm = () => {
 
       if (authError) {
          setError('Неверный email или пароль');
-      } else {
-         router.push('/sites');
-         router.refresh();
+         setLoading(false);
+         return;
       }
 
+      // Clear any prior client query cache
+      queryClient.clear();
+
+      // Ensure server session is established and cookies are readable
+      const serverCheck = await verifyServerSession();
+      let authenticated = serverCheck.authenticated;
+
+      if (!authenticated) {
+         await new Promise<void>(resolve => setTimeout(resolve, 150));
+         const retry = await verifyServerSession();
+         authenticated = retry.authenticated;
+      }
+
+      if (!authenticated) {
+         setError('Не удалось подтвердить сессию. Попробуйте войти ещё раз.');
+         setLoading(false);
+         return;
+      }
+
+      // Reset form fields
+      setEmail('');
+      setPassword('');
+
+      router.push('/sites');
+      router.refresh();
       setLoading(false);
    };
 
@@ -50,15 +90,17 @@ export const LoginForm = () => {
             <Input
                label="Email"
                type="email"
+               name="email"
                value={email}
                onChange={e => setEmail(e.target.value)}
                placeholder="manager@example.com"
                required
-               autoComplete="email"
+               autoComplete="username"
             />
             <Input
                label="Пароль"
                type="password"
+               name="password"
                value={password}
                onChange={e => setPassword(e.target.value)}
                placeholder="••••••••"

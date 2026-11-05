@@ -93,7 +93,14 @@ export const SiteDetail = ({siteId}: Props) => {
          {tasksLoading ? (
             <Spinner centered />
          ) : !tasks?.length ? (
-            <p className={styles.empty}>Задач пока нет</p>
+            <div className={styles.empty}>
+               <p className={styles['empty-title']}>Задач пока нет</p>
+               <p className={styles['empty-subtitle']}>
+                  {isManager
+                     ? 'Нажмите «+ Добавить задачу», чтобы поставить первую задачу на этом объекте.'
+                     : 'На этом объекте пока нет назначенных вам задач.'}
+               </p>
+            </div>
          ) : (
             <div className={styles['tasks-list']}>
                {tasks.map(task => (
@@ -151,7 +158,7 @@ export const SiteDetail = ({siteId}: Props) => {
                onChange={e =>
                   setForm(p => ({...p, description: e.target.value}))
                }
-               placeholder="Подробное описание задачи..."
+               placeholder="Подробности задачи..."
             />
             <Select
                label="Исполнитель *"
@@ -160,7 +167,6 @@ export const SiteDetail = ({siteId}: Props) => {
                   setForm(p => ({...p, assignee_id: e.target.value}))
                }
                options={executorOptions}
-               placeholder="Выберите исполнителя"
             />
          </Dialog>
       </div>

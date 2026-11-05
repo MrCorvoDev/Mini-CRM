@@ -26,8 +26,7 @@
    display: flex;
    align-items: flex-start;
    justify-content: space-between;
-   gap: to-rem(16);
-   margin-bottom: to-rem(8);
+   margin-bottom: em(8);
 }
 
 .title {
@@ -37,8 +36,8 @@
 }
 
 .address {
+   font-size: em(15);
    color: var(--light);
-   font-size: em(14);
    margin: 0 0 to-rem(32);
 }
 
@@ -58,23 +57,24 @@
 .tasks-list {
    display: flex;
    flex-direction: column;
-   gap: to-rem(10);
+   gap: em(10);
 }
 
 .task-card {
    background: #0d1527;
    border: 1px solid rgba(255, 255, 255, 0.07);
    border-radius: em(10);
-   padding: em(16) em(20);
+   padding: em(14) em(18);
    display: flex;
    align-items: center;
+   justify-content: space-between;
    gap: em(16);
    text-decoration: none;
-   color: inherit;
-   transition: border-color 0.15s;
+   transition: border-color 0.15s, background 0.15s;
 
    &:hover {
-      border-color: rgba(78, 70, 252, 0.4);
+      border-color: rgba(255, 255, 255, 0.2);
+      background: #111b33;
    }
 }
 
@@ -85,7 +85,7 @@
 
 .task-title {
    font-size: em(15);
-   font-weight: 400;
+   font-weight: 500;
    margin: 0 0 em(4);
    color: var(--text);
    overflow: hidden;
@@ -101,9 +101,30 @@
 
 .empty {
    text-align: center;
+   padding: to-rem(48) to-rem(24);
+   background: #0d1527;
+   border: 1px dashed rgba(255, 255, 255, 0.12);
+   border-radius: em(12);
+   display: flex;
+   flex-direction: column;
+   align-items: center;
+   justify-content: center;
+   gap: em(8);
+}
+
+.empty-title {
+   font-size: em(16);
+   font-weight: 600;
+   color: var(--text);
+   margin: 0;
+}
+
+.empty-subtitle {
+   font-size: em(14);
    color: var(--light);
-   padding: to-rem(40);
-   font-size: em(15);
+   max-width: to-rem(420);
+   line-height: 1.5;
+   margin: 0;
 }
 
 .error {

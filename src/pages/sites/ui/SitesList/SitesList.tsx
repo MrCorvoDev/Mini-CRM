@@ -97,7 +97,14 @@ export const SitesList = () => {
          </div>
 
          {!sites?.length ? (
-            <p className={styles.empty}>Объектов пока нет</p>
+            <div className={styles.empty}>
+               <p className={styles['empty-title']}>Объектов пока нет</p>
+               <p className={styles['empty-subtitle']}>
+                  {isManager
+                     ? 'Создайте первый строительный объект с помощью кнопки «+ Добавить объект» выше.'
+                     : 'Объекты появятся здесь, когда вам будут назначены связанные задачи.'}
+               </p>
+            </div>
          ) : (
             <div className={styles.grid}>
                {sites.map(site => (
@@ -205,6 +212,7 @@ export const SitesList = () => {
                label="Название *"
                value={form.name}
                onChange={e => setForm(p => ({...p, name: e.target.value}))}
+               placeholder="ЖК «Северный»"
                error={formError}
                autoFocus
             />
@@ -212,6 +220,7 @@ export const SitesList = () => {
                label="Адрес"
                value={form.address}
                onChange={e => setForm(p => ({...p, address: e.target.value}))}
+               placeholder="ул. Северная, 15"
             />
          </Dialog>
       </div>

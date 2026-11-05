@@ -3,9 +3,44 @@
 .badge {
    display: inline-flex;
    align-items: center;
-   padding: em(3) em(10);
+   justify-content: center;
+   gap: em(6);
+   padding: em(4) em(12);
    border-radius: em(20);
    font-size: em(13);
-   font-weight: 400;
+   font-weight: 500;
+   line-height: 1.2;
    white-space: nowrap;
+   letter-spacing: 0.01em;
+   transition: all 0.2s ease;
+
+   &_new {
+      background: rgba(96, 165, 250, 0.14);
+      color: #93c5fd;
+      border: 1px solid rgba(96, 165, 250, 0.35);
+   }
+
+   &_in_progress {
+      background: rgba(129, 140, 248, 0.15);
+      color: #a5b4fc;
+      border: 1px solid rgba(129, 140, 248, 0.35);
+   }
+
+   &_on_review {
+      background: rgba(251, 191, 36, 0.14);
+      color: #fcd34d;
+      border: 1px solid rgba(251, 191, 36, 0.35);
+   }
+
+   &_rework {
+      background: rgba(248, 113, 113, 0.14);
+      color: #fca5a5;
+      border: 1px solid rgba(248, 113, 113, 0.35);
+   }
+
+   &_accepted {
+      background: rgba(74, 222, 128, 0.14);
+      color: #86efac;
+      border: 1px solid rgba(74, 222, 128, 0.35);
+   }
 }

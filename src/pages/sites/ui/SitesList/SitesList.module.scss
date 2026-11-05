@@ -2,7 +2,7 @@
 
 .page {
    padding: to-rem(32) to-rem(24);
-   max-width: to-rem(900);
+   max-width: to-rem(1100);
    margin: 0 auto;
    width: 100%;
 }
@@ -11,11 +11,11 @@
    display: flex;
    align-items: center;
    justify-content: space-between;
-   margin-bottom: to-rem(24);
+   margin-bottom: to-rem(28);
 }
 
 .title {
-   font-size: em(24);
+   font-size: em(26);
    font-weight: 700;
    margin: 0;
 }
@@ -30,27 +30,30 @@
    background: #0d1527;
    border: 1px solid rgba(255, 255, 255, 0.07);
    border-radius: em(12);
-   padding: em(20) em(24);
+   padding: em(20);
    display: flex;
    flex-direction: column;
-   gap: em(8);
-   transition: border-color 0.15s;
+   justify-content: space-between;
+   transition: border-color 0.15s, transform 0.15s;
 
    &:hover {
-      border-color: rgba(78, 70, 252, 0.4);
+      border-color: rgba(255, 255, 255, 0.2);
+      transform: translateY(-1px);
    }
 }
 
 .card-link {
    text-decoration: none;
    color: inherit;
+   flex: 1;
+   margin-bottom: em(12);
 }
 
 .card-name {
-   font-size: em(16);
-   font-weight: 700;
+   font-size: em(17);
+   font-weight: 600;
+   margin: 0 0 em(6);
    color: var(--text);
-   margin: 0;
 }
 
 .card-address {
@@ -67,9 +70,30 @@
 
 .empty {
    text-align: center;
-   color: var(--light);
-   padding: to-rem(60);
+   padding: to-rem(56) to-rem(24);
+   background: #0d1527;
+   border: 1px dashed rgba(255, 255, 255, 0.12);
+   border-radius: em(14);
+   display: flex;
+   flex-direction: column;
+   align-items: center;
+   justify-content: center;
+   gap: em(8);
+}
+
+.empty-title {
    font-size: em(16);
+   font-weight: 600;
+   color: var(--text);
+   margin: 0;
+}
+
+.empty-subtitle {
+   font-size: em(14);
+   color: var(--light);
+   max-width: to-rem(440);
+   line-height: 1.5;
+   margin: 0;
 }
 
 .error {

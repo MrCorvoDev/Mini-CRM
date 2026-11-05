@@ -29,10 +29,11 @@
    gap: em(16);
    text-decoration: none;
    color: inherit;
-   transition: border-color 0.15s;
+   transition: border-color 0.15s, background 0.15s;
 
    &:hover {
       border-color: rgba(78, 70, 252, 0.4);
+      background: #111b33;
    }
 }
 
@@ -43,7 +44,7 @@
 
 .task-title {
    font-size: em(15);
-   font-weight: 400;
+   font-weight: 500;
    margin: 0 0 em(4);
    color: var(--text);
    overflow: hidden;
@@ -59,7 +60,28 @@
 
 .empty {
    text-align: center;
-   color: var(--light);
-   padding: to-rem(60);
+   padding: to-rem(56) to-rem(24);
+   background: #0d1527;
+   border: 1px dashed rgba(255, 255, 255, 0.12);
+   border-radius: em(12);
+   display: flex;
+   flex-direction: column;
+   align-items: center;
+   justify-content: center;
+   gap: em(8);
+}
+
+.empty-title {
    font-size: em(16);
+   font-weight: 600;
+   color: var(--text);
+   margin: 0;
+}
+
+.empty-subtitle {
+   font-size: em(14);
+   color: var(--light);
+   max-width: to-rem(440);
+   line-height: 1.5;
+   margin: 0;
 }

@@ -14,7 +14,6 @@ import {
 import type {TaskStatus} from '@/shared/api';
 import {STATUS_LABELS} from '@/shared/config';
 import {Button} from '@/shared/ui/Button';
-import {Dialog} from '@/shared/ui/Dialog';
 import {Textarea} from '@/shared/ui/Input';
 import {Spinner} from '@/shared/ui/Spinner';
 import {StatusBadge} from '@/shared/ui/StatusBadge';
@@ -23,111 +22,58 @@ import styles from './TaskDetail.module.scss';
 
 dayjs.locale('ru');
 
+const ROLE_LABELS: Record<string, string> = {
+   manager: 'Менеджер',
+   executor: 'Исполнитель',
+};
+
 interface Props {
    taskId: string;
 }
 
-// What transitions are allowed, based on role + current status
-function getAllowedActions(
-   status: TaskStatus,
-   isManager: boolean,
-   isAssignee: boolean,
-): Array<{
-   label: string;
-   toStatus: TaskStatus;
-   requiresComment: boolean;
-   variant: 'primary' | 'secondary' | 'danger';
-}> {
-   const actions: Array<{
-      label: string;
-      toStatus: TaskStatus;
-      requiresComment: boolean;
-      variant: 'primary' | 'secondary' | 'danger';
-   }> = [];
-
-   if (isAssignee) {
-      if (status === 'new')
-         actions.push({
-            label: 'Взять в работу',
-            toStatus: 'in_progress',
-            requiresComment: false,
-            variant: 'primary',
-         });
-      if (status === 'in_progress')
-         actions.push({
-            label: 'На проверку',
-            toStatus: 'on_review',
-            requiresComment: false,
-            variant: 'primary',
-         });
-      if (status === 'rework')
-         actions.push({
-            label: 'Взять в работу',
-            toStatus: 'in_progress',
-            requiresComment: false,
-            variant: 'primary',
-         });
-   }
-
-   if (isManager) {
-      if (status === 'on_review') {
-         actions.push({
-            label: 'Принять',
-            toStatus: 'accepted',
-            requiresComment: false,
-            variant: 'primary',
-         });
-         actions.push({
-            label: 'На доработку',
-            toStatus: 'rework',
-            requiresComment: true,
-            variant: 'danger',
-         });
-      }
-   }
-
-   return actions;
-}
-
 export const TaskDetail = ({taskId}: Props) => {
    const router = useRouter();
-   const {profile, isManager} = useCurrentProfile();
-   const {data: task, isLoading, error} = useTask(taskId);
+   const {
+      profile,
+      session,
+      isLoading: profileLoading,
+      isManager,
+      initialized,
+   } = useCurrentProfile();
+   const {data: task, isLoading: taskLoading, error} = useTask(taskId);
    const {data: history} = useTaskHistory(taskId);
    const changeStatus = useChangeTaskStatus();
    const deleteTask = useDeleteTask();
 
-   const [commentOpen, setCommentOpen] = useState(false);
-   const [pendingStatus, setPendingStatus] = useState<TaskStatus | null>(null);
-   const [comment, setComment] = useState('');
-   const [commentError, setCommentError] = useState('');
+   const [reworkComment, setReworkComment] = useState('');
+   const [reworkCommentError, setReworkCommentError] = useState('');
    const [mutationError, setMutationError] = useState('');
 
-   if (isLoading) return <Spinner centered size="lg" />;
-   if (error || !task)
+   if (taskLoading || profileLoading || !initialized) {
+      return <Spinner centered size="lg" />;
+   }
+
+   if (error || !task) {
       return (
-         <p className={styles.error}>Задача не найдена или доступ запрещён</p>
+         <div className={styles.page}>
+            <p className={styles.error}>
+               Задача не найдена или у вас нет прав на её просмотр
+            </p>
+         </div>
       );
+   }
 
-   const isAssignee = profile?.id === task.assignee_id;
-   const actions = getAllowedActions(task.status, isManager, isAssignee);
+   const currentUserId = profile?.id ?? session?.user?.id;
+   const isAssignee = !!currentUserId && currentUserId === task.assignee_id;
 
-   const handleAction = (toStatus: TaskStatus, requiresComment: boolean) => {
+   const handleStatusChange = async (toStatus: TaskStatus, comment = '') => {
       setMutationError('');
-      if (requiresComment) {
-         setComment('');
-         setCommentError('');
-         setPendingStatus(toStatus);
-         setCommentOpen(true);
-      } else {
-         void performChange(toStatus, '');
-      }
-   };
-
-   const performChange = async (toStatus: TaskStatus, cmt: string) => {
       try {
-         await changeStatus.mutateAsync({taskId, toStatus, comment: cmt});
-         setCommentOpen(false);
+         await changeStatus.mutateAsync({taskId, toStatus, comment});
+         if (toStatus === 'rework') {
+            setReworkComment('');
+            setReworkCommentError('');
+         }
       } catch (err) {
          const msg =
             err instanceof Error ? err.message : 'Ошибка изменения статуса';
@@ -135,25 +81,45 @@ export const TaskDetail = ({taskId}: Props) => {
       }
    };
 
-   const handleCommentSubmit = () => {
-      if (!comment.trim()) {
-         setCommentError('Комментарий обязателен');
+   const handleReworkSubmit = () => {
+      if (!reworkComment.trim()) {
+         setReworkCommentError(
+            'Комментарий обязателен при возврате на доработку',
+         );
          return;
       }
-      if (!pendingStatus) return;
-      void performChange(pendingStatus, comment.trim());
+      void handleStatusChange('rework', reworkComment.trim());
    };
 
    const handleDelete = async () => {
       if (!confirm('Удалить задачу? Это действие необратимо.')) return;
-      await deleteTask.mutateAsync(taskId);
-      router.push(`/sites/${task.site_id}`);
+      try {
+         await deleteTask.mutateAsync(taskId);
+         router.push(`/sites/${task.site_id}`);
+      } catch (err) {
+         const msg =
+            err instanceof Error ? err.message : 'Ошибка удаления задачи';
+         setMutationError(msg);
+      }
    };
+
+   // Determine action buttons based on status and role
+   const showExecutorTakeInProgress =
+      isAssignee && (task.status === 'new' || task.status === 'rework');
+   const showExecutorSendToReview = isAssignee && task.status === 'in_progress';
+
+   const showManagerReviewActions = isManager && task.status === 'on_review';
+
+   const hasActions =
+      showExecutorTakeInProgress ||
+      showExecutorSendToReview ||
+      showManagerReviewActions ||
+      isManager;
 
    return (
       <div className={styles.page}>
          <Link href={`/sites/${task.site_id}`} className={styles.back}>
-            ← {task.site?.name ?? 'Объект'}
+            ← {task.site?.name ?? 'Назад к объекту'}
          </Link>
 
          <div className={styles.card}>
@@ -168,137 +134,172 @@ export const TaskDetail = ({taskId}: Props) => {
                   <span className={styles['meta-value']}>
                      <Link
                         href={`/sites/${task.site_id}`}
-                        style={{color: 'var(--accent)'}}
+                        className={styles['meta-link']}
                      >
                         {task.site?.name ?? '—'}
                      </Link>
                   </span>
                </div>
+
                <div className={styles['meta-item']}>
                   <span className={styles['meta-label']}>Исполнитель</span>
                   <span className={styles['meta-value']}>
                      {task.assignee?.full_name ?? '—'}
                   </span>
                </div>
+
                <div className={styles['meta-item']}>
                   <span className={styles['meta-label']}>Автор</span>
                   <span className={styles['meta-value']}>
                      {task.creator?.full_name ?? '—'}
+                     {task.creator?.role
+                        ? ` (${ROLE_LABELS[task.creator.role] ?? task.creator.role})`
+                        : ''}
                   </span>
                </div>
+
                <div className={styles['meta-item']}>
                   <span className={styles['meta-label']}>Создана</span>
                   <span className={styles['meta-value']}>
-                     {dayjs(task.created_at).format('D MMM YYYY, HH:mm')}
+                     {dayjs(task.created_at).format('D MMMM YYYY, HH:mm')}
                   </span>
                </div>
+
                <div className={styles['meta-item']}>
                   <span className={styles['meta-label']}>Обновлена</span>
                   <span className={styles['meta-value']}>
-                     {dayjs(task.updated_at).format('D MMM YYYY, HH:mm')}
+                     {dayjs(task.updated_at).format('D MMMM YYYY, HH:mm')}
                   </span>
                </div>
             </div>
 
             {task.description && (
-               <p className={styles.description}>{task.description}</p>
+               <div className={styles['description-box']}>
+                  <p className={styles['description-title']}>Описание задачи</p>
+                  <p className={styles.description}>{task.description}</p>
+               </div>
             )}
 
             {mutationError && <p className={styles.error}>{mutationError}</p>}
 
-            {(actions.length > 0 || isManager) && (
-               <div className={styles.actions}>
-                  {actions.map(action => (
-                     <Button
-                        key={action.toStatus}
-                        variant={action.variant}
-                        size="sm"
-                        loading={changeStatus.isPending}
-                        onClick={() =>
-                           handleAction(action.toStatus, action.requiresComment)
-                        }
-                     >
-                        {action.label}
-                     </Button>
-                  ))}
-                  {isManager && (
-                     <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => {
-                           void handleDelete();
-                        }}
-                     >
-                        Удалить задачу
-                     </Button>
+            {hasActions && (
+               <div className={styles['actions-container']}>
+                  {showManagerReviewActions && (
+                     <div className={styles['rework-box']}>
+                        <Textarea
+                           label="Комментарий к возврату на доработку *"
+                           value={reworkComment}
+                           onChange={e => {
+                              setReworkComment(e.target.value);
+                              if (reworkCommentError) setReworkCommentError('');
+                           }}
+                           error={reworkCommentError}
+                           placeholder="Опишите, что именно требуется исправить (обязательно для возврата)..."
+                        />
+                     </div>
                   )}
+
+                  <div className={styles.actions}>
+                     {showExecutorTakeInProgress && (
+                        <Button
+                           variant="primary"
+                           loading={changeStatus.isPending}
+                           onClick={() =>
+                              void handleStatusChange('in_progress')
+                           }
+                        >
+                           Взять в работу
+                        </Button>
+                     )}
+
+                     {showExecutorSendToReview && (
+                        <Button
+                           variant="primary"
+                           loading={changeStatus.isPending}
+                           onClick={() => void handleStatusChange('on_review')}
+                        >
+                           Отправить на проверку
+                        </Button>
+                     )}
+
+                     {showManagerReviewActions && (
+                        <>
+                           <Button
+                              variant="primary"
+                              loading={changeStatus.isPending}
+                              onClick={() =>
+                                 void handleStatusChange('accepted')
+                              }
+                           >
+                              Принять
+                           </Button>
+                           <Button
+                              variant="danger"
+                              loading={changeStatus.isPending}
+                              onClick={handleReworkSubmit}
+                           >
+                              Вернуть на доработку
+                           </Button>
+                        </>
+                     )}
+
+                     {isManager && (
+                        <Button
+                           variant="ghost"
+                           size="sm"
+                           onClick={() => {
+                              void handleDelete();
+                           }}
+                        >
+                           Удалить задачу
+                        </Button>
+                     )}
+                  </div>
                </div>
             )}
          </div>
 
-         {/* History */}
-         <h2 className={styles['history-title']}>История статусов</h2>
-         <div className={styles['history-list']}>
-            {history?.map(entry => (
-               <div key={entry.id} className={styles['history-item']}>
-                  <div className={styles['history-row']}>
-                     <span className={styles['history-arrow']}>
-                        {entry.from_status
-                           ? STATUS_LABELS[entry.from_status]
-                           : '(создание)'}
-                        {' → '}
-                     </span>
-                     <StatusBadge status={entry.to_status} />
-                  </div>
-                  {entry.comment && (
-                     <p className={styles['history-comment']}>
-                        💬 {entry.comment}
+         {/* History section */}
+         <div className={styles['history-section']}>
+            <h2 className={styles['history-title']}>История статусов</h2>
+            <div className={styles['history-list']}>
+               {history?.map(entry => (
+                  <div key={entry.id} className={styles['history-item']}>
+                     <div className={styles['history-row']}>
+                        <span className={styles['history-arrow']}>
+                           {entry.from_status
+                              ? STATUS_LABELS[entry.from_status]
+                              : '(создание)'}
+                           {' → '}
+                        </span>
+                        <StatusBadge status={entry.to_status} />
+                     </div>
+                     {entry.comment && (
+                        <p className={styles['history-comment']}>
+                           💬 {entry.comment}
+                        </p>
+                     )}
+                     <p className={styles['history-meta']}>
+                        <span>{entry.changer?.full_name ?? '—'}</span>
+                        {entry.changer?.role && (
+                           <span className={styles['history-role']}>
+                              (
+                              {ROLE_LABELS[entry.changer.role] ??
+                                 entry.changer.role}
+                              )
+                           </span>
+                        )}
+                        <span>·</span>
+                        <span>
+                           {dayjs(entry.changed_at).format(
+                              'D MMMM YYYY, HH:mm',
+                           )}
+                        </span>
                      </p>
-                  )}
-                  <p className={styles['history-meta']}>
-                     {entry.changer?.full_name ?? '—'} ·{' '}
-                     {dayjs(entry.changed_at).format('D MMM YYYY, HH:mm')}
-                  </p>
-               </div>
-            ))}
+                  </div>
+               ))}
+            </div>
          </div>
-
-         {/* Comment dialog for rework */}
-         <Dialog
-            open={commentOpen}
-            onClose={() => setCommentOpen(false)}
-            title="Комментарий к доработке"
-            footer={
-               <>
-                  <Button
-                     variant="secondary"
-                     onClick={() => setCommentOpen(false)}
-                  >
-                     Отмена
-                  </Button>
-                  <Button
-                     variant="danger"
-                     onClick={handleCommentSubmit}
-                     loading={changeStatus.isPending}
-                  >
-                     Отправить на доработку
-                  </Button>
-               </>
-            }
-         >
-            <p style={{color: 'var(--light)', fontSize: '0.875em', margin: 0}}>
-               Опишите, что нужно исправить. Комментарий будет виден
-               исполнителю.
-            </p>
-            <Textarea
-               label="Комментарий *"
-               value={comment}
-               onChange={e => setComment(e.target.value)}
-               error={commentError}
-               placeholder="Указать, какие секции переделать..."
-               autoFocus
-            />
-         </Dialog>
       </div>
    );
 };

@@ -20,7 +20,13 @@ export const MyTasks = () => {
          <h1 className={styles.title}>Мои задачи</h1>
 
          {!tasks?.length ? (
-            <p className={styles.empty}>Задач нет</p>
+            <div className={styles.empty}>
+               <p className={styles['empty-title']}>Задач пока нет</p>
+               <p className={styles['empty-subtitle']}>
+                  У вас пока нет активных задач. Когда менеджер назначит вам
+                  задачу на объекте, она появится в этом списке.
+               </p>
+            </div>
          ) : (
             <div className={styles.list}>
                {tasks.map(task => (
@@ -33,7 +39,7 @@ export const MyTasks = () => {
                         <p className={styles['task-title']}>{task.title}</p>
                         <p className={styles['task-meta']}>
                            {task.site?.name ?? '—'} ·{' '}
-                           {dayjs(task.updated_at).format('D MMM YYYY')}
+                           {dayjs(task.updated_at).format('D MMMM YYYY, HH:mm')}
                         </p>
                      </div>
                      <StatusBadge status={task.status} />
